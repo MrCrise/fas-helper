@@ -1,0 +1,390 @@
+{
+    "cases": [
+        {
+            "case_id": "fas_050_07_223-38600_2025",
+            "raw_id": "050/07/223-38600/2025",
+            "case_name": "Дело №050/07/223-38600/2025 050/07/223-38600/2025 от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/25a58956-ed04-4128-8ab9-87d82179ccd7/",
+            "procedure_type": "18.1 – жалоба",
+            "registration_date": "2025-10-22",
+            "department": "Московское областное УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-22",
+            "review_stage": "Рассмотрение жалобы по существу",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_039_07_3-1001_2025",
+            "raw_id": "039/07/3-1001/2025",
+            "case_name": "Дело №039/07/3-1001/2025 Жалоба №8309-ЛК/25 от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/13c91de8-6a71-4526-b5d5-13247916978a/",
+            "procedure_type": "223-ФЗ – жалоба",
+            "registration_date": "2025-10-22",
+            "department": "Калининградское УФАС России",
+            "activity_sphere": "Контроль закупок",
+            "initiation_date": "2025-10-22",
+            "review_stage": "Рассмотрение жалобы по существу",
+            "closing_date": "2025-10-30",
+            "participants": [
+                {
+                    "raw_name": "АО \"Россети Янтарь\"",
+                    "norm_name": "Россети Янтарь",
+                    "org_form": "АО",
+                    "inn": "3903007130,",
+                    "ogrn": "1023900764832",
+                    "role": "Заказчик"
+                },
+                {
+                    "raw_name": "ООО \"Городское дорожно-коммунальное предприятие\"",
+                    "norm_name": "Городское дорожно-коммунальное предприятие",
+                    "org_form": "ООО",
+                    "inn": "3905609531,",
+                    "ogrn": "1093925032882",
+                    "role": "Заявитель"
+                }
+            ]
+        },
+        {
+            "case_id": "fas_068_07_3-738_2025",
+            "raw_id": "068/07/3-738/2025",
+            "case_name": "Дело №068/07/3-738/2025 жалоба ООО «Высокое качество медицинской техники» (вх. от 17... от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/12826ab7-634d-4aba-b5b3-92cf5fe1e5c7/",
+            "procedure_type": "223-ФЗ – жалоба",
+            "registration_date": "2025-10-22",
+            "department": "Тамбовское УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-21",
+            "review_stage": "Рассмотрение жалобы по существу",
+            "closing_date": null,
+            "participants": [
+                {
+                    "raw_name": "ООО «Высокое качество медицинской техники»",
+                    "norm_name": "Высокое качество медицинской техники",
+                    "org_form": "ООО",
+                    "inn": "2225164467,",
+                    "ogrn": "1152225022080",
+                    "role": "Заявитель"
+                },
+                {
+                    "raw_name": "ГБУЗ «ТОКБ им. В.Д. Бабенко»",
+                    "norm_name": "ГБУЗ «ТОКБ им. В.Д. Бабенко»",
+                    "org_form": null,
+                    "inn": "6832008411,",
+                    "ogrn": "1026801227310",
+                    "role": "Заказчик"
+                }
+            ]
+        },
+        {
+            "case_id": "fas_054_05_20-2727_2025",
+            "raw_id": "054/05/20-2727/2025",
+            "case_name": "Дело №054/05/20-2727/2025 в отношении ИП Малявкина А.А. от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/465e9bc6-bb47-42f9-85e2-4cde73cc6832/",
+            "procedure_type": "Реклама",
+            "registration_date": "2025-10-22",
+            "department": "Новосибирское УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-22",
+            "review_stage": "Архив",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_054_04_7_30_4-2713_2025",
+            "raw_id": "054/04/7.30.4-2713/2025",
+            "case_name": "Дело №054/04/7.30.4-2713/2025 в отношении Федерального государственного бюджетного учрежде... от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/8aebe469-1052-4e9e-b9b8-843dfcace41c/",
+            "procedure_type": "КоАП",
+            "registration_date": "2025-10-22",
+            "department": "Новосибирское УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-22",
+            "review_stage": "Архив",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_008_01_17_1-219_2025",
+            "raw_id": "008/01/17.1-219/2025",
+            "case_name": "Дело №008/01/17.1-219/2025 ч.1 ст.17.1 135-фз от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/3a908d7f-b316-4ecd-903b-3852bbdb4fde/",
+            "procedure_type": "АМЗ",
+            "registration_date": "2025-10-22",
+            "department": "Калмыцкое УФАС России",
+            "activity_sphere": "Операции с недвижимым имуществом, включая землю",
+            "initiation_date": "2025-10-22",
+            "review_stage": "Рассмотрение дела",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_055_05_18-1291_2025",
+            "raw_id": "055/05/18-1291/2025",
+            "case_name": "Дело №055/05/18-1291/2025 Нарушение требований части 1 статьи 18 Федерального закона «... от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/73f4caad-5c03-404b-9523-92cba61bcd19/",
+            "procedure_type": "Реклама",
+            "registration_date": "2025-10-22",
+            "department": "Омское УФАС России",
+            "activity_sphere": "Рынок рекламы",
+            "initiation_date": "2025-10-22",
+            "review_stage": "Рассмотрение заявления и возбуждение дела",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_050_07_223-38917_2025",
+            "raw_id": "050/07/223-38917/2025",
+            "case_name": "Дело №050/07/223-38917/2025 050/07/223-38917/2025 от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/7bc8f28d-f97e-4b2a-a228-b4b9fb793e81/",
+            "procedure_type": "18.1 – жалоба",
+            "registration_date": "2025-10-22",
+            "department": "Московское областное УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-22",
+            "review_stage": "Рассмотрение жалобы по существу",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_050_07_223-38616_2025",
+            "raw_id": "050/07/223-38616/2025",
+            "case_name": "Дело №050/07/223-38616/2025 050/07/223-38616/2025 от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/d9875e4a-3067-475e-8cae-f224f1805a0e/",
+            "procedure_type": "18.1 – жалоба",
+            "registration_date": "2025-10-22",
+            "department": "Московское областное УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-22",
+            "review_stage": "Рассмотрение жалобы по существу",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_027_04_14_3-1498_2025",
+            "raw_id": "027/04/14.3-1498/2025",
+            "case_name": "Дело №027/04/14.3-1498/2025 Постановление о назначении административного наказания по де... от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/2c8a0f37-fbac-4b4b-9094-745ef359c7e8/",
+            "procedure_type": "КоАП",
+            "registration_date": "2025-10-22",
+            "department": "Хабаровское УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-23",
+            "review_stage": "Архив",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_04_10_18_1-623_2025",
+            "raw_id": "04/10/18.1-623/2025",
+            "case_name": "Дело №04/10/18.1-623/2025 Новый дом на Администрацию Арамильского г.о. от 23 октября 2025 г.",
+            "case_date": "2025-10-23",
+            "case_url": "https://br.fas.gov.ru/cases/8e2d1bbb-a133-4c74-afdf-46303243cf19/",
+            "procedure_type": "18.1 – жалоба",
+            "registration_date": "2025-10-23",
+            "department": "Управление контроля строительства и природных ресурсов",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-23",
+            "review_stage": "Рассмотрение жалобы по существу",
+            "closing_date": null,
+            "participants": [
+                {
+                    "raw_name": "ООО \"Новый дом\"",
+                    "norm_name": "Новый дом",
+                    "org_form": "ООО",
+                    "inn": "7452035298,",
+                    "ogrn": "1037403771129",
+                    "role": "Заявитель"
+                },
+                {
+                    "raw_name": "Администрация Арамильского городского округа",
+                    "norm_name": "Администрация Арамильского городского округа",
+                    "org_form": null,
+                    "inn": "6652004270,",
+                    "ogrn": "1026602178239",
+                    "role": "Ответчик"
+                }
+            ]
+        },
+        {
+            "case_id": "fas_058_07_3-751_2025",
+            "raw_id": "058/07/3-751/2025",
+            "case_name": "Дело №058/07/3-751/2025 Жалоба ООО \"Гуд Лаб Компани\" от 23 октября 2025 г.",
+            "case_date": "2025-10-23",
+            "case_url": "https://br.fas.gov.ru/cases/d9a895b5-4851-456e-84c1-62c32bf98c7a/",
+            "procedure_type": "223-ФЗ – жалоба",
+            "registration_date": "2025-10-23",
+            "department": "Пензенское УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-23",
+            "review_stage": "Предварительное рассмотрение жалобы",
+            "closing_date": null,
+            "participants": [
+                {
+                    "raw_name": "ООО \"Горводоканал\"",
+                    "norm_name": "Горводоканал",
+                    "org_form": "ООО",
+                    "inn": "5836623790,",
+                    "ogrn": "1065836023714",
+                    "role": "Заказчик"
+                },
+                {
+                    "raw_name": "ООО \"Гуд Лаб Компани\"",
+                    "norm_name": "Гуд Лаб Компани",
+                    "org_form": "ООО",
+                    "inn": "1659147409,",
+                    "ogrn": "1141690050699",
+                    "role": "Заявитель"
+                }
+            ]
+        },
+        {
+            "case_id": "fas_029_07_3-1036_2025",
+            "raw_id": "029/07/3-1036/2025",
+            "case_name": "Дело №029/07/3-1036/2025 Жалоба №9509-ЭП/25 от 23.10.2025 от 23 октября 2025 г.",
+            "case_date": "2025-10-23",
+            "case_url": "https://br.fas.gov.ru/cases/8c0d5c67-9b55-4b4c-bf0f-ab5547930060/",
+            "procedure_type": "223-ФЗ – жалоба",
+            "registration_date": "2025-10-23",
+            "department": "Архангельское УФАС России",
+            "activity_sphere": "Контроль закупок",
+            "initiation_date": "2025-10-23",
+            "review_stage": "Жалоба принята. Назначено рассмотрение.",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_027_04_14_3-1591_2025",
+            "raw_id": "027/04/14.3-1591/2025",
+            "case_name": "Дело №027/04/14.3-1591/2025 Постановление о назначении административного наказания по д... от 23 октября 2025 г.",
+            "case_date": "2025-10-23",
+            "case_url": "https://br.fas.gov.ru/cases/58e1cf7f-ac29-4686-a923-3ebfba3bbce6/",
+            "procedure_type": "КоАП",
+            "registration_date": "2025-10-23",
+            "department": "Хабаровское УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-23",
+            "review_stage": "Архив",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_027_10_18_1-1777_2025",
+            "raw_id": "027/10/18.1-1777/2025",
+            "case_name": "Дело №027/10/18.1-1777/2025 Решение по жалобе ООО «Логопарк-ДВ» (вх. № 15661-ЭП/25 от 0... от 23 октября 2025 г.",
+            "case_date": "2025-10-23",
+            "case_url": "https://br.fas.gov.ru/cases/f758ebed-1cea-4b4b-8a64-7469c166cc10/",
+            "procedure_type": "18.1 – жалоба",
+            "registration_date": "2025-10-23",
+            "department": "Хабаровское УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-23",
+            "review_stage": "Архив",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_027_10_18_1-1490_2025",
+            "raw_id": "027/10/18.1-1490/2025",
+            "case_name": "Дело №027/10/18.1-1490/2025 Решение о признании жалобы ООО «Импульс Трейд» (вх. № 15634-... от 23 октября 2025 г.",
+            "case_date": "2025-10-23",
+            "case_url": "https://br.fas.gov.ru/cases/8c79a66e-1116-4611-b0a5-8590a7d8c914/",
+            "procedure_type": "18.1 – жалоба",
+            "registration_date": "2025-10-23",
+            "department": "Хабаровское УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-23",
+            "review_stage": "Архив",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_022_05_5-1381_2025",
+            "raw_id": "022/05/5-1381/2025",
+            "case_name": "Дело №022/05/5-1381/2025 Реклама в интернете от 23 октября 2025 г.",
+            "case_date": "2025-10-23",
+            "case_url": "https://br.fas.gov.ru/cases/a254e949-26b0-4446-9ecb-bac4d659f95e/",
+            "procedure_type": "Реклама",
+            "registration_date": "2025-10-23",
+            "department": "Алтайское краевое УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-23",
+            "review_stage": "Рассмотрение заявления и возбуждение дела",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_042_05_18-1806_2025",
+            "raw_id": "042/05/18-1806/2025",
+            "case_name": "Дело №042/05/18-1806/2025 Определение от 23 октября 2025 г.",
+            "case_date": "2025-10-23",
+            "case_url": "https://br.fas.gov.ru/cases/f46baa26-566d-426e-b762-b9125e9a54c8/",
+            "procedure_type": "Реклама",
+            "registration_date": "2025-10-23",
+            "department": "Кемеровское УФАС России",
+            "activity_sphere": "Рынок рекламы",
+            "initiation_date": "2025-10-23",
+            "review_stage": "Рассмотрение дела",
+            "closing_date": null,
+            "participants": []
+        },
+        {
+            "case_id": "fas_7644_10_18_1-1473_2025",
+            "raw_id": "7644/10/18.1-1473/2025",
+            "case_name": "Дело №7644/10/18.1-1473/2025 Жалоба на действия организатора торгов Управление имуществен... от 23 октября 2025 г.",
+            "case_date": "2025-10-23",
+            "case_url": "https://br.fas.gov.ru/cases/af7ca187-7022-41f7-81f8-dbd027bf1d84/",
+            "procedure_type": "18.1 – жалоба",
+            "registration_date": "2025-10-23",
+            "department": "Ярославско-Костромское МУФАС России",
+            "activity_sphere": "Операции с недвижимым имуществом, включая землю: распределение государственного и муниципального имущества",
+            "initiation_date": "2025-10-24",
+            "review_stage": "Предварительное рассмотрение жалобы",
+            "closing_date": null,
+            "participants": [
+                {
+                    "raw_name": "УПРАВЛЕНИЕ ИМУЩЕСТВЕННЫХ И ЗЕМЕЛЬНЫХ ОТНОШЕНИЙ АДМИНИСТРАЦИИ ГОРОДА КОСТРОМЫ",
+                    "norm_name": "РАВЛЕНИЕ ИМУЩЕСТВЕННЫХ И ЗЕМЕЛЬНЫХ ОТНОШЕНИЙ АДМИНИСТРАЦИИ ГОРОДА КОСТРОМЫ",
+                    "org_form": "УП",
+                    "inn": "4401006568,",
+                    "ogrn": "1034408610411",
+                    "role": "Ответчик"
+                }
+            ]
+        },
+        {
+            "case_id": "fas_037_05_5-513_2025",
+            "raw_id": "037/05/5-513/2025",
+            "case_name": "Дело №037/05/5-513/2025 реклама услуг по сопровождению процедуры банкротства от 22 октября 2025 г.",
+            "case_date": "2025-10-22",
+            "case_url": "https://br.fas.gov.ru/cases/ea8aba65-606b-44c1-8c10-c46ff947ee64/",
+            "procedure_type": "Реклама",
+            "registration_date": "2025-10-22",
+            "department": "Ивановское УФАС России",
+            "activity_sphere": null,
+            "initiation_date": "2025-10-22",
+            "review_stage": "Рассмотрение заявления и возбуждение дела",
+            "closing_date": null,
+            "participants": [
+                {
+                    "raw_name": "Генеральному директору ООО «ФРЕШ РЕСТАРТ» Томилину Д.В.",
+                    "norm_name": "«ФРЕШ РЕСТАРТ",
+                    "org_form": "ООО",
+                    "inn": "9731120807,",
+                    "ogrn": "1237700616262",
+                    "role": "Лицо, в действиях которого содержатся признаки нарушения законодательства РФ о рекламе"
+                }
+            ]
+        }
+    ]
+}
