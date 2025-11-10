@@ -1,6 +1,6 @@
 from selenium import webdriver
 
-from database import save_to_db, count_cases
+from database import save_to_db, count_cases, clear_all_tables
 from parser import parse_data
 
 if __name__ == '__main__':  

@@ -1,7 +1,7 @@
 import os
 
 from datetime import datetime
-from sqlalchemy import create_engine, MetaData, select, func
+from sqlalchemy import create_engine, delete, select, func, MetaData
 from sqlalchemy.exc import DataError
 from dotenv import load_dotenv
 
@@ -128,6 +128,20 @@ def save_to_db(cases_dict: dict, documents_dict: dict):
                             doc_type=doc['document_type']
                         ).returning(documents.c.id)
                     )
+
+def clear_all_tables():
+    load_dotenv()
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    engine = create_engine(DATABASE_URL)
+    metadata = MetaData()
+    metadata.reflect(bind=engine)
+    
+    with engine.begin() as conn:
+        # Важен порядок из-за foreign keys!
+        conn.execute(delete(metadata.tables['case_participant']))
+        conn.execute(delete(metadata.tables['documents']))
+        conn.execute(delete(metadata.tables['participants']))
+        conn.execute(delete(metadata.tables['cases']))
 
 def count_cases():
     load_dotenv()
