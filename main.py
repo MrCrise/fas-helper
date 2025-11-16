@@ -1,32 +1,24 @@
 from transformers import AutoTokenizer
 from chunkers.sentence_chunker import SentenceChunker
-from chunkers.token_chunker import TokenChunker
+from constants import TOKENIZER_NAME
 from text import *
+from FlagEmbedding import BGEM3FlagModel
+from constants import EMBEDDING_MODEL_NAME
 
+model = BGEM3FlagModel(EMBEDDING_MODEL_NAME, use_fp16=True)
 
-TOKENIZER_NAME = "Qwen/Qwen3-8B"
 tokenizer = AutoTokenizer.from_pretrained(
     TOKENIZER_NAME, trust_remote_code=True)
 
-
-text = document_3
+text = document
 chunker = SentenceChunker(tokenizer)
-# norm_text = chunker.normalize_text(text)
+
 chunks = chunker.chunk(text)
 print("Чанков:", len(chunks))
 for i in range(len(chunks)):
     print(f"Токенов в {i}-ом:", chunks[i]["token_count"])
 print()
-# print("Чанк:\n", chunks[0]["text"])
-# print()
-# print("Чанк:\n", chunks[1]["text"])
-# print()
-# print("Чанк:\n", chunks[2]["text"])
-for i in range(len(chunks)):
-    print(f"Чанк {i} ({chunks[i]["start_char"]}:{chunks[i]["end_char"]}):", chunks[i]["text"])
-    print()
-    # print(f"Исходный текст ({chunks[i]["start_char"]}:{chunks[i]["end_char"]}):", norm_text[chunks[i]["start_char"]:chunks[i]["end_char"]])
-    # print()
-    # print()
-    # print()
 
+chunk_texts = [chunk.get("text") for chunk in chunks]
+chunk_embeddings = model.encode(chunk_texts)
+print(chunk_embeddings)

@@ -86,6 +86,7 @@ class SentenceChunker(BaseChunker):
 
         chunks = []
         i = 0
+        chunk_num = 0
         while i < n:
             cur_tokens = 0
             j = i
@@ -99,10 +100,13 @@ class SentenceChunker(BaseChunker):
             chunk_text = text[start_char:end_char]
             chunk_tokens = self.get_token_count(chunk_text)
 
-            chunks.append({"text": chunk_text,
+            chunks.append({"index": chunk_num,
+                           "text": chunk_text,
                            "start_char": start_char,
                            "end_char": end_char,
                            "token_count": chunk_tokens})
+
+            chunk_num += 1
 
             if j >= n:
                 break
