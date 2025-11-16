@@ -1,5 +1,5 @@
-# Chunker
-A text chunkers repo for FAS-helper project.
+# Ingester
+Repo that provides text chunkers, embedders and vector storage data saving.
 
 # Known bugs and issues:
 1. Returning chunks contains indexes of normalized text instead of original text.
