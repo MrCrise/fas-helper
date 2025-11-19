@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from chunkers.base_chunker import BaseChunker
 import re
 
@@ -74,7 +74,7 @@ class SentenceChunker(BaseChunker):
 
         return sentences
 
-    def _sliding_window_chunk(self, text: str,
+    def _sliding_window_chunk(self, text: str, doc_id: Optional[str] = None,
                               chunk_size: int = 600,
                               overlap: int = 90) -> List[Dict[str, Any]]:
 
@@ -101,6 +101,7 @@ class SentenceChunker(BaseChunker):
             chunk_tokens = self.get_token_count(chunk_text)
 
             chunks.append({"index": chunk_num,
+                           "doc_id": doc_id,
                            "text": chunk_text,
                            "start_char": start_char,
                            "end_char": end_char,
@@ -136,11 +137,12 @@ class SentenceChunker(BaseChunker):
 
         return chunks
 
-    def chunk(self, text: str,
+    def chunk(self, text: str, doc_id: Optional[str] = None,
               chunk_size: int = 800,
               overlap: int = 100) -> List[Dict[str, Any]]:
 
         text = self.normalize_text(text)
-        chunks = self._sliding_window_chunk(text, chunk_size, overlap)
+        chunks = self._sliding_window_chunk(
+            text=text, doc_id=doc_id, chunk_size=chunk_size, overlap=overlap)
 
         return chunks
