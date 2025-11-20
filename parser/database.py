@@ -31,11 +31,6 @@ def save_to_db(case: dict, linked_documents: list, logging = False):
     case_participant = metadata.tables['case_participant']
     documents = metadata.tables['documents']
     
-    # cases_data = cases_dict['cases']
-    # documents_data = documents_dict['documents']
-    
-    # print(f'Number of parsed cases: {len(cases_data)}')
-    
     with engine.begin() as conn:
         existing_case = conn.execute(
             cases.select().where(cases.c.raw_id == case['raw_id'])
@@ -120,7 +115,9 @@ def save_to_db(case: dict, linked_documents: list, logging = False):
                         url=doc['url'],
                         full_text=doc['document_text'],
                         text_length=doc['text_length'],
-                        doc_type=doc['document_type']
+                        doc_type=doc['document_type'],
+                        added_to_qdrant = None,
+                        embedder_version = None
                     )
                 )
 

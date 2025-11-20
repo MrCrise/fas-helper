@@ -1,4 +1,4 @@
-from database import save_to_db, count_cases, clear_all_tables
+from database import count_cases, clear_all_tables
 from parser import parse_data, create_chrome_driver, create_firefox_driver
 
 

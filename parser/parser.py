@@ -323,11 +323,8 @@ def parse_one_case(driver, case_url):
                 i += 4
                 
         except Exception as e:
-            print(f"Ошибка при парсинге участников для дела {case_id}: {e}")
-            print(f"Данные участников: {participants_text}")
-    
-    # all_cases_data['cases'].append(case_record)
-    
+            print(f"Partitipant {case_id} parsing error: {e}")
+        
     # Парсим связанные документы
     documents = []
     
@@ -358,6 +355,10 @@ def parse_one_case(driver, case_url):
             
             container = driver.find_element(By.ID, "document_text_container")
             full_document_text = container.text
+            
+            if not full_document_text or full_document_text.strip() == "":
+                print(f"Empty doc: {doc_url}")
+                continue
             
             lines = full_document_text.split('\n')
             cleaned_lines = []
@@ -402,18 +403,18 @@ def parse_one_case(driver, case_url):
             
             documents.append(document_record)
             
-        except NoSuchElementException as e:
-            documents.append({
-                'case_id': case_id,
-                'document_id': f"unavailable_{doc_idx}",
-                'raw_doc_id': f"unavailable_{doc_idx}",
-                'title': f"Недоступный документ {doc_idx}",
-                'document_date': "",
-                'url': doc_url,
-                'document_text': "Документ недоступен",
-                'text_length': 0,
-                'document_type': "Недоступен"
-            })
+        # except NoSuchElementException as e:
+        #     documents.append({
+        #         'case_id': case_id,
+        #         'document_id': f"unavailable_{doc_idx}",
+        #         'raw_doc_id': f"unavailable_{doc_idx}",
+        #         'title': f"Недоступный документ {doc_idx}",
+        #         'document_date': "",
+        #         'url': doc_url,
+        #         'document_text': "Документ недоступен",
+        #         'text_length': 0,
+        #         'document_type': "Недоступен"
+        #     })
         except Exception as e:
             continue
         
