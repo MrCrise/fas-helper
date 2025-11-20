@@ -111,7 +111,7 @@ def save_to_db(cases_dict: dict, documents_dict: dict, logging = False):
         # Записываем связанные дела
         for doc in documents_data:
             existing_document = conn.execute(
-                documents.select().where(documents.c.doc_id == doc['document_id'])  # ← participants.select()
+                documents.select().where(documents.c.doc_id == doc['document_id'])
             ).first()
             #Тут же вызывать метод чанкера и эмбедера
             if not existing_document:

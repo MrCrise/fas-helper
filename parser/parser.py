@@ -14,7 +14,7 @@ def create_chrome_driver():
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--disable-web-security')
     
-    options.add_argument('--disable-javascript')  # ускоряет в 3-5 раз!
+    options.add_argument('--disable-javascript')
     options.add_argument('--blink-settings=imagesEnabled=false')
     options.add_argument('--disable-extensions')
     options.add_argument('--no-sandbox')
