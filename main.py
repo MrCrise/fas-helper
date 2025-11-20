@@ -7,26 +7,30 @@ from qdrant_client import QdrantClient
 from constants import EMBEDDING_MODEL
 from embedder import Embedder
 
-model = BGEM3FlagModel(EMBEDDING_MODEL, use_fp16=True,
-                       device='cuda')
+from database import count_cases, clear_all_tables
+from parser import parse_data, create_chrome_driver, create_firefox_driver
 
-tokenizer = AutoTokenizer.from_pretrained(
-    TOKENIZER_NAME, trust_remote_code=True)
+if __name__ == '__main__':  
+    try:
+        model = BGEM3FlagModel(EMBEDDING_MODEL, use_fp16=True,
+                            device='cuda')
 
-client = QdrantClient(host="localhost", port=6333)
+        tokenizer = AutoTokenizer.from_pretrained(
+            TOKENIZER_NAME, trust_remote_code=True)
 
-text = document
-chunker = SentenceChunker(tokenizer)
+        client = QdrantClient(host="localhost", port=6333)
 
-chunks = chunker.chunk(text)
-print("Чанков:", len(chunks))
-for i in range(len(chunks)):
-    print(f"Токенов в {i}-ом:", chunks[i]["token_count"])
-print()
+        chunker = SentenceChunker(tokenizer)
+        
+        embedder = Embedder(client=client, model=model, tokenizer=tokenizer)
+        
+        driver = create_chrome_driver()
+        
+        clear_all_tables()
+        parse_data(driver, chunker, embedder, start_page = 2)
+        
+        print('-' * 50)
+        print(f'Number of cases in the db: {count_cases()}')
 
-embedder = Embedder(client=client, model=model, tokenizer=tokenizer)
-
-embedder.create_qdrant_collection()
-embeddings = embedder.generate_chunk_embeddings(chunks)
-
-embedder.insert_to_qdrant(embeddings)
+    finally:
+        driver.quit()

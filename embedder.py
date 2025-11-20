@@ -117,11 +117,15 @@ class Embedder:
 
             converted_sparse = self.convert_sparse_vector(sparse_weights)
 
+            document_id = chunk.get("document_id", "unknown_doc")
+            chunk_index = chunk.get("index", 0)
+            id = f"{document_id}_chunk_{chunk_index}"
+
             self.client.upsert(
                 collection_name=collection_name,
                 points=[
                     models.PointStruct(
-                        id=chunk.get("index"),  # TODO: Change id getting logic to get unique ids for points of different documents.
+                        id=id,  # TODO: Change id getting logic to get unique ids for points of different documents.
                         payload=chunk,
                         vector={
                             "dense": dense_vector,

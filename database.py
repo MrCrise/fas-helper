@@ -116,8 +116,8 @@ def save_to_db(case: dict, linked_documents: list, logging = False):
                         full_text=doc['document_text'],
                         text_length=doc['text_length'],
                         doc_type=doc['document_type'],
-                        added_to_qdrant = None,
-                        embedder_version = None
+                        added_to_qdrant = doc['added_to_qdrant'],
+                        embedder_model = doc['embedder_model']
                     )
                 )
 
