@@ -111,22 +111,43 @@ def save_to_db(case: dict, linked_documents: list, logging=False):
             ).first()
 
             if not existing_document:
-                conn.execute(
-                    documents.insert().values(
-                        case_id=case_id,
-                        doc_id=doc['document_id'],
-                        raw_doc_id=doc['raw_doc_id'],
-                        title=doc['title'],
-                        publish_date=convert_to_date(doc['document_date']),
-                        url=doc['url'],
-                        full_text=doc['document_text'],
-                        text_length=doc['text_length'],
-                        doc_type=doc['document_type'],
-                        added_to_qdrant=doc['added_to_qdrant'],
-                        embedder_version=doc['embedder_version']
+                try:
+                    conn.execute(
+                        documents.insert().values(
+                            case_id=case_id,
+                            doc_id=doc['document_id'],
+                            raw_doc_id=doc['raw_doc_id'],
+                            title=doc['title'],
+                            publish_date=convert_to_date(doc['document_date']),
+                            url=doc['url'],
+                            full_text=doc['document_text'],
+                            text_length=doc['text_length'],
+                            doc_type=doc['document_type'],
+                            added_to_qdrant=doc.get('added_to_qdrant', False),
+                            embedder_version=doc.get('embedder_version')
+                        )
                     )
-                )
+                except Exception as e:
+                    print(f"Document saving error {doc['document_id']}: {e}")
 
+def update_document_qdrant_status(doc_id: str, success: bool, version: str):
+    """Обновляет статус добавления документа в Qdrant"""
+    load_dotenv()
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    engine = create_engine(DATABASE_URL)
+    metadata = MetaData()
+    metadata.reflect(bind=engine)
+    documents = metadata.tables['documents']
+    
+    with engine.begin() as conn:
+        conn.execute(
+            documents.update()
+            .where(documents.c.doc_id == doc_id)
+            .values(
+                added_to_qdrant=success,
+                embedder_version=version
+            )
+        )
 
 def clear_all_tables():
     load_dotenv()

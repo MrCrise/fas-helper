@@ -2,7 +2,7 @@ import re
 import json
 import math
 
-from database import save_to_db
+from database import save_to_db, update_document_qdrant_status
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -240,19 +240,22 @@ def parse_data(driver, chunker, embedder, start_page=2, last_page=1, step=-1):
             case, linked_documents = parse_one_case(driver, case_url)
             save_to_db(case, linked_documents)
             for doc in linked_documents:
-                text = doc['document_text']
-                chunks = chunker.chunk(text, doc_id=doc['document_id'])
+                try:
+                    text = doc['document_text']
+                    chunks = chunker.chunk(text, doc_id=doc['document_id'])
 
-                print("Чанков:", len(chunks))
-                for i in range(len(chunks)):
-                    print(f"Токенов в {i}-ом:", chunks[i]["token_count"])
-                print()
+                    print("Чанков:", len(chunks))
+                    for i in range(len(chunks)):
+                        print(f"Токенов в {i}-ом:", chunks[i]["token_count"])
+                    print()
 
-                embeddings = embedder.generate_chunk_embeddings(chunks)
-                embedder.insert_to_qdrant(embeddings)
+                    embeddings = embedder.generate_chunk_embeddings(chunks)
+                    embedder.insert_to_qdrant(embeddings)
 
-                doc['added_to_qdrant'] = True
-                doc['embedder_version'] = embedder.version
+                    update_document_qdrant_status(doc['document_id'], True, embedder.version)
+                except Exception as e:
+                    print(f'Qdrant insertion error for document: {doc['document_id']}')
+                    update_document_qdrant_status(doc['document_id'], False, embedder.version)
 
 
 def parse_one_case(driver, case_url):
@@ -390,10 +393,6 @@ def parse_one_case(driver, case_url):
             container = driver.find_element(By.ID, "document_text_container")
             full_document_text = container.text
 
-            if not full_document_text or full_document_text.strip() == "":
-                print(f"Empty doc: {doc_url}")
-                continue
-
             lines = full_document_text.split('\n')
             cleaned_lines = []
 
@@ -433,14 +432,18 @@ def parse_one_case(driver, case_url):
                 'title': title_text,
                 'document_date': doc_date,
                 'url': doc_url,
-                'document_text': cleaned_text,
-                'text_length': text_length,
+                'document_text': cleaned_text if cleaned_text.strip() else None,
+                'text_length': text_length if cleaned_text.strip() else 0,
                 'document_type': document_type,
                 'added_to_qdrant': False,
                 'embedder_version': None
             }
 
-            documents.append(document_record)
+            if cleaned_text.strip():
+                documents.append(document_record)
+                
+            else:
+                print(f"Empty document: {doc_url}")
 
         # except NoSuchElementException as e:
         #     documents.append({
