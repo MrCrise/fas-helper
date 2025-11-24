@@ -5,6 +5,24 @@ from sqlalchemy.exc import DataError
 from dotenv import load_dotenv
 
 
+def load_database_url():
+    load_dotenv()
+    # .env файл в формате postgresql://user:pass@localhost/mydb
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    return DATABASE_URL
+
+
+def create_engine(database_url, logging):
+    engine = create_engine(database_url, echo=logging)
+    return engine
+
+
+def create_metadata(engine):
+    metadata = MetaData()
+    metadata.reflect(bind=engine)
+    return metadata
+
+
 def convert_to_date(date_str):
     if not date_str:
         return None
@@ -14,20 +32,11 @@ def convert_to_date(date_str):
         return None
 
 
-def save_to_db(case: dict, linked_documents: list, logging=False):
+def save_to_db(case: dict, linked_documents: list, engine, metadata):
     """
     Функция принимает словарь с делами и список со связанными документами, 
     после чего записывает их в уже созданную базу данных
     """
-
-    load_dotenv()
-    # .env файл в формате postgresql://user:pass@localhost/mydb
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-
-    engine = create_engine(DATABASE_URL, echo=logging)
-    metadata = MetaData()
-    metadata.reflect(bind=engine)
-
     cases = metadata.tables['cases']
     participants = metadata.tables['participants']
     case_participant = metadata.tables['case_participant']
@@ -130,13 +139,8 @@ def save_to_db(case: dict, linked_documents: list, logging=False):
                 except Exception as e:
                     print(f"Document saving error {doc['document_id']}: {e}")
 
-def update_document_qdrant_status(doc_id: str, success: bool, version: str):
-    """Обновляет статус добавления документа в Qdrant"""
-    load_dotenv()
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-    engine = create_engine(DATABASE_URL)
-    metadata = MetaData()
-    metadata.reflect(bind=engine)
+
+def update_document_qdrant_status(doc_id: str, success: bool, version: str, engine, metadata):
     documents = metadata.tables['documents']
     
     with engine.begin() as conn:
@@ -149,13 +153,28 @@ def update_document_qdrant_status(doc_id: str, success: bool, version: str):
             )
         )
 
-def clear_all_tables():
-    load_dotenv()
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-    engine = create_engine(DATABASE_URL)
-    metadata = MetaData()
-    metadata.reflect(bind=engine)
 
+def get_document_text_by_id(doc_id: str, engine, metadata):
+    documents = metadata.tables['documents']
+    
+    try:
+        with engine.begin() as conn:
+            document = conn.execute(
+                documents.select().where(documents.c.doc_id == doc_id)
+            ).first()
+        
+        if not document or not document.full_text:
+            print(f"Document {doc_id} not found or has no text")
+            return None
+            
+        return document.full_text
+        
+    except Exception as e:
+        print(f"Error text getting by ID: {doc_id}: {e}")
+        return None
+
+
+def clear_all_tables(engine, metadata):
     with engine.begin() as conn:
         conn.execute(delete(metadata.tables['case_participant']))
         conn.execute(delete(metadata.tables['documents']))
@@ -163,12 +182,7 @@ def clear_all_tables():
         conn.execute(delete(metadata.tables['cases']))
 
 
-def count_cases():
-    load_dotenv()
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-    engine = create_engine(DATABASE_URL)
-
-    metadata = MetaData()
+def count_cases(engine, metadata):
     metadata.reflect(bind=engine)
     cases = metadata.tables['cases']
 

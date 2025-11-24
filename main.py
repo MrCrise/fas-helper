@@ -7,7 +7,7 @@ from qdrant_client import QdrantClient
 from constants import EMBEDDING_MODEL
 from embedder import Embedder
 
-from database import count_cases, clear_all_tables
+from database import count_cases, clear_all_tables, load_database_url, create_engine, create_metadata
 from parser import parse_data, create_chrome_driver, create_firefox_driver
 
 if __name__ == '__main__':
@@ -26,8 +26,14 @@ if __name__ == '__main__':
 
         driver = create_chrome_driver()
 
-        clear_all_tables()
-        parse_data(driver, chunker, embedder, start_page=3)
+        DATABASE_URL = load_database_url()
+        
+        engine = create_engine(DATABASE_URL, logging=False)
+        
+        metadata = create_metadata(engine)
+        
+        # clear_all_tables(engine, metadata)
+        parse_data(driver, chunker, embedder, engine, metadata, start_page=3)
 
         print('-' * 50)
         print(f'Number of cases in the db: {count_cases()}')
