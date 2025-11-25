@@ -116,10 +116,12 @@ def save_to_db(case: dict, linked_documents: list, engine, metadata):
         for doc in linked_documents:
             existing_document = conn.execute(
                 documents.select().where(
-                    documents.c.doc_id == doc['document_id'])
+                    documents.c.raw_doc_id == doc['raw_doc_id'])
             ).first()
 
-            if not existing_document:
+            if existing_document:
+                print(f"Document {doc['document_id']} already exists")
+            else:
                 try:
                     conn.execute(
                         documents.insert().values(
