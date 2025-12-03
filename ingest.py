@@ -7,7 +7,7 @@ from qdrant_client import QdrantClient
 from constants import EMBEDDING_MODEL
 from embedder import Embedder
 
-from database import count_cases, clear_all_tables
+from database import count_cases, clear_all_tables, load_database_url, create_db_engine, create_metadata
 from parser import parse_data, create_chrome_driver, create_firefox_driver
 
 if __name__ == '__main__':
@@ -18,7 +18,12 @@ if __name__ == '__main__':
         tokenizer = AutoTokenizer.from_pretrained(
             TOKENIZER_NAME, trust_remote_code=True)
 
-        client = QdrantClient(host="localhost", port=6333)
+        client = QdrantClient(
+            host="localhost",
+            port=6334,
+            prefer_grpc=True,
+            timeout=100
+        )
 
         chunker = SentenceChunker(tokenizer)
 
@@ -26,11 +31,17 @@ if __name__ == '__main__':
 
         driver = create_chrome_driver()
 
-        clear_all_tables()
-        parse_data(driver, chunker, embedder, start_page=3)
+        DATABASE_URL = load_database_url()
+
+        engine = create_db_engine(DATABASE_URL, logging=False)
+
+        metadata = create_metadata(engine)
+
+        # clear_all_tables(engine, metadata)
+        parse_data(driver, chunker, embedder, engine, metadata, start_page=50, last_page=20)
 
         print('-' * 50)
-        print(f'Number of cases in the db: {count_cases()}')
+        print(f'Number of cases in the db: {count_cases(engine=engine, metadata=metadata)}')
 
     finally:
         driver.quit()

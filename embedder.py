@@ -29,7 +29,8 @@ class Embedder:
                 vectors_config={
                     "dense": models.VectorParams(
                         size=1024,
-                        distance=models.Distance.COSINE
+                        distance=models.Distance.COSINE,
+                        on_disk=True
                     ),
                     "colbert": models.VectorParams(
                         size=1024,
@@ -37,6 +38,7 @@ class Embedder:
                         multivector_config=models.MultiVectorConfig(
                             comparator=models.MultiVectorComparator.MAX_SIM
                         ),
+                        on_disk=True
                     )
                 },
                 sparse_vectors_config={
@@ -91,7 +93,7 @@ class Embedder:
         sparse_values = []
 
         for key, value in sparse_weights.items():
-            if float(value) > 1:
+            if float(value) > 0:
                 if isinstance(key, str):
                     if key.isdigit():
                         key = int(key)
@@ -107,10 +109,13 @@ class Embedder:
         )
 
     def insert_to_qdrant(self, embeddings: List[Dict[str, Any]],
-                         collection_name: str = "legal_rag") -> None:
+                         collection_name: str = "legal_rag",
+                         batch_size: int = 25) -> None:
         """
         Загружает переданные эмбеддинги в коллекцию Qdrant.
         """
+
+        points_batch = []
 
         for embedding in tqdm(embeddings, desc="Загрузка в Qdrant: "):
             chunk = embedding.get("chunk")
@@ -122,19 +127,29 @@ class Embedder:
 
             id = uuid4()
 
+            point = models.PointStruct(
+                id=id,
+                payload=chunk,
+                vector={
+                    "dense": dense_vector,
+                    "sparse": converted_sparse,
+                    "colbert": colbert_vectors
+                }
+            )
+            points_batch.append(point)
+
+            if len(points_batch) >= batch_size:
+                self.client.upsert(
+                    collection_name=collection_name,
+                    points=points_batch
+                )
+                points_batch.clear()
+
+        if points_batch:
             self.client.upsert(
                 collection_name=collection_name,
-                points=[
-                    models.PointStruct(
-                        id=id,  # TODO: Change id getting logic to get unique ids for points of different documents.
-                        payload=chunk,
-                        vector={
-                            "dense": dense_vector,
-                            "sparse": converted_sparse,
-                            "colbert": colbert_vectors
-                        }
-                    )
-                ]
+                points=points_batch
             )
 
-        print(f"Загружено {len(embeddings)} эмбеддингов в коллекцию {collection_name}")
+        print(
+            f"Загружено {len(embeddings)} эмбеддингов в коллекцию {collection_name}")

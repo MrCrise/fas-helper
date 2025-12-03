@@ -224,7 +224,7 @@ def normalize_id(raw_id):
     return normalized
 
 
-def parse_data(driver, chunker, embedder, start_page=2, last_page=1, step=-1):
+def parse_data(driver, chunker, embedder, engine, metadata, start_page=2, last_page=1, step=-1):
     """Функция парсит данные из базы ФАС"""
 
     embedder.create_qdrant_collection()
@@ -238,7 +238,7 @@ def parse_data(driver, chunker, embedder, start_page=2, last_page=1, step=-1):
 
         for case_url in cases_urls:
             case, linked_documents = parse_one_case(driver, case_url)
-            save_to_db(case, linked_documents)
+            save_to_db(case, linked_documents, engine, metadata)
             for doc in linked_documents:
                 try:
                     text = doc['document_text']
@@ -252,10 +252,18 @@ def parse_data(driver, chunker, embedder, start_page=2, last_page=1, step=-1):
                     embeddings = embedder.generate_chunk_embeddings(chunks)
                     embedder.insert_to_qdrant(embeddings)
 
-                    update_document_qdrant_status(doc['document_id'], True, embedder.version)
+                    update_document_qdrant_status(doc['document_id'],
+                                                  True,
+                                                  embedder.version,
+                                                  engine,
+                                                  metadata)
                 except Exception as e:
-                    print(f'Qdrant insertion error for document: {doc['document_id']}')
-                    update_document_qdrant_status(doc['document_id'], False, embedder.version)
+                    print(
+                        f"Qdrant insertion error for document: {doc['document_id']}")
+                    update_document_qdrant_status(doc['document_id'], False,
+                                                  embedder.version,
+                                                  engine,
+                                                  metadata)
 
 
 def parse_one_case(driver, case_url):
@@ -441,7 +449,7 @@ def parse_one_case(driver, case_url):
 
             if cleaned_text.strip():
                 documents.append(document_record)
-                
+
             else:
                 print(f"Empty document: {doc_url}")
 
