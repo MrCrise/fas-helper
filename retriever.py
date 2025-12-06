@@ -98,6 +98,7 @@ class AsyncRetriever:
                     "score": point.score,
                     # "title": payload.get("title", ""),
                     "best_chunk": payload.get("text", ""),
+                    "url": None,
                     "full_text": None
                 }
 
@@ -112,9 +113,11 @@ class AsyncRetriever:
 
         doc_ids_to_fetch = [doc["doc_id"] for doc in sorted_results]
 
-        full_texts_map = await self.doc_fetcher.get_texts_by_ids(doc_ids_to_fetch)
+        docs_data_map = await self.doc_fetcher.get_texts_and_urls_by_ids(doc_ids_to_fetch)
 
         for result in sorted_results:
-            result["full_text"] = full_texts_map.get(result["doc_id"])
+            doc_data = docs_data_map.get(result["doc_id"])
+            result["url"] = doc_data.get("url")
+            result["full_text"] = doc_data.get("full_text")
 
         return sorted_results

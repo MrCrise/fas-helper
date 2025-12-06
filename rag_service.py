@@ -1,4 +1,6 @@
+import json
 import time
+from typing import AsyncGenerator
 from qdrant_client import AsyncQdrantClient
 from database import load_database_url
 from document_fetcher import AsyncDocumentFetcher
@@ -48,9 +50,9 @@ class AsyncRAG:
         print("OK")
         print("-" * 50)
 
-    async def process_query(self, query: str) -> None:
+    async def terminal_stream(self, query: str) -> None:
         """
-        Обрабатывает один запрос.
+        Обрабатывает один запрос через терминал.
         """
 
         start_time = time.time()
@@ -91,6 +93,35 @@ class AsyncRAG:
         print("\n" + "-" * 60)
         total_time = time.time() - start_time
         print(f"Total time elapsed: {total_time}")
+    
+    async def chat_stream(self, query: str) -> AsyncGenerator[str, None]:
+        """
+        Обрабатывает запрос для API. Возвращает NDJSON строки.
+        Сначала источники, потом стрим токенов от LLM.
+        """
+
+        try:
+            search_results = await self.retriever.search(query=query)
+
+            sources_data = []
+            for doc in search_results:
+                doc_safe = doc.copy()
+                doc_safe.pop("full_text", None)
+                sources_data.append(doc_safe)
+            
+            yield json.dumps({"type": "sources", "data": sources_data}, ensure_ascii=False) + "\n"
+
+            if not search_results:
+                yield json.dumps({"type": "token", "data": "К сожалению, релевантные документы не найдены."}, ensure_ascii=False) + "\n"
+                return
+            
+            async for chunk in self.llm.generate_stream(query=query, documents=search_results):
+                yield json.dumps({"type": "token", "data": chunk}, ensure_ascii=False) + "\n"
+        
+        except Exception as e:
+            print(f"Error in chat stream: {e}")
+            yield json.dumps({"type": "error", "data": str(e)}, ensure_ascii=False) + "\n"
+
 
     async def close(self) -> None:
         """
@@ -98,7 +129,7 @@ class AsyncRAG:
         """
 
         if self.client:
-            self.client.close()
+            await self.client.close()
         if self.doc_fetcher:
-            self.doc_fetcher.close()
+            await self.doc_fetcher.close()
         print("All connections closed")

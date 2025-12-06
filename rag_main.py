@@ -19,7 +19,7 @@ async def main():
             if not user_input:
                 continue
 
-            await rag.process_query(user_input)
+            await rag.terminal_stream(user_input)
 
     except KeyboardInterrupt:
         print("\nForce interruption")
