@@ -1,4 +1,3 @@
-import json
 import time
 from typing import AsyncGenerator
 from qdrant_client import AsyncQdrantClient
@@ -8,6 +7,7 @@ from FlagEmbedding import BGEM3FlagModel
 from constants import EMBEDDING_MODEL
 from llm_service import AsyncLLMService
 from retriever import AsyncRetriever
+from schemas import DocumentMetadata, ErrorEvent, SourcesEvent, SourcesEventData, TokenEvent
 
 
 class AsyncRAG:
@@ -93,35 +93,43 @@ class AsyncRAG:
         print("\n" + "-" * 60)
         total_time = time.time() - start_time
         print(f"Total time elapsed: {total_time}")
-    
+
     async def chat_stream(self, query: str) -> AsyncGenerator[str, None]:
         """
-        Обрабатывает запрос для API. Возвращает NDJSON строки.
-        Сначала источники, потом стрим токенов от LLM.
+        Обрабатывает запрос для API.
+        Сначала возвращает источники, потом стрим токенов от LLM.
         """
 
         try:
             search_results = await self.retriever.search(query=query)
 
-            sources_data = []
+            sources_schemas = []
             for doc in search_results:
-                doc_safe = doc.copy()
-                doc_safe.pop("full_text", None)
-                sources_data.append(doc_safe)
-            
-            yield json.dumps({"type": "sources", "data": sources_data}, ensure_ascii=False) + "\n"
+                sources_schemas.append(
+                    DocumentMetadata(
+                        doc_id=doc.get("doc_id"),
+                        url=doc.get("url"),
+                        best_chunk=doc.get("best_chunk", ""),
+                        score=doc.get("score")
+                    )
+                )
+
+            event = SourcesEvent(data=SourcesEventData(items=sources_schemas))
+            yield event.model_dump_json(ensure_ascii=False) + "\n"
 
             if not search_results:
-                yield json.dumps({"type": "token", "data": "К сожалению, релевантные документы не найдены."}, ensure_ascii=False) + "\n"
-                return
-            
-            async for chunk in self.llm.generate_stream(query=query, documents=search_results):
-                yield json.dumps({"type": "token", "data": chunk}, ensure_ascii=False) + "\n"
-        
-        except Exception as e:
-            print(f"Error in chat stream: {e}")
-            yield json.dumps({"type": "error", "data": str(e)}, ensure_ascii=False) + "\n"
+                no_docs_event = TokenEvent(
+                    data="К сожалению, релевантные документы не найдены.")
+                yield no_docs_event.model_dump_json(ensure_ascii=False) + "\n"
 
+            async for chunk in self.llm.generate_stream(query=query, documents=search_results):
+                token_event = TokenEvent(data=chunk)
+                yield token_event.model_dump_json(ensure_ascii=False) + "\n"
+
+        except Exception as e:
+            error_event = ErrorEvent(data=str(e))
+            print(f"Error in chat stream: {e}")
+            yield error_event.model_dump_json(ensure_ascii=False) + "\n"
 
     async def close(self) -> None:
         """
