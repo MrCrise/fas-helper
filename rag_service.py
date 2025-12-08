@@ -4,7 +4,7 @@ from qdrant_client import AsyncQdrantClient
 from database import load_database_url
 from document_fetcher import AsyncDocumentFetcher
 from FlagEmbedding import BGEM3FlagModel
-from constants import EMBEDDING_MODEL
+from constants import EMBEDDING_MODEL, OLLAMA_HOST
 from llm_service import AsyncLLMService
 from retriever import AsyncRetriever
 from schemas import DocumentMetadata, ErrorEvent, SourcesEvent, SourcesEventData, TokenEvent
@@ -43,7 +43,7 @@ class AsyncRAG:
 
         print(" [4/4] Initializing Ollama", end=" ", flush=True)
         self.llm = AsyncLLMService(
-            llm_host="http://localhost:11434",
+            llm_host=OLLAMA_HOST,
             model_name="qwen3:8b",
             context_window_size=20000
         )
