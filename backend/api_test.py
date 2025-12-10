@@ -7,7 +7,7 @@ import json
 
 url = "http://localhost:8000/api/chat"
 payload = {
-    "query": "Реклама на фасадах зданий",
+    "query": "Решение по Хабаровским УФАС",
     "history": [],
 }
 

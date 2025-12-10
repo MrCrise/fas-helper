@@ -6,7 +6,7 @@ from ollama import AsyncClient
 class AsyncLLMService:
     def __init__(self,
                  llm_host: str,
-                 model_name: str = "qwen3:8b",
+                 model_name: str = "qwen3:4b",
                  context_window_size: int = 30000):
         self.client = AsyncClient(llm_host)
         self.model_name = model_name

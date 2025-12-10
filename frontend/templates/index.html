@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Подключение основных стилей приложения -->
+<link rel="stylesheet" href="/static/css/style.css">
+
+<!-- Основной лейаут: фиксированная высота для корректного скролла -->
+<div class="flex flex-col h-[calc(100vh-var(--top-height))]">
+  
+  <!-- Область чата (Скроллится только этот блок) -->
+  <div id="chat-scroll" class="flex-1 overflow-y-auto px-4 scroll-smooth" style="padding-bottom: calc(var(--bottom-height) + 2rem);">
+    <div id="chat-container" class="max-w-4xl mx-auto pt-6 pb-4">
+      <!-- Сообщения генерируются JavaScript'ом -->
+    </div>
+  </div>
+
+  <!-- Нижняя панель ввода (Фиксирована внизу) -->
+  <div id="bottom-bar" class="fixed left-0 right-0 bottom-0 z-50 border-t" style="height: var(--bottom-height); background-color: var(--bg-color); border-top-color: var(--card-border);">
+    <div class="max-w-4xl mx-auto h-full flex items-center px-4">
+      <div class="relative w-full">
+        <input id="chat-input" type="text" placeholder="Сформулируйте запрос..." autocomplete="off" class="w-full h-12 p-4 pl-6 pr-14 rounded-full shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-gray-500/50" style="border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color);" />
+        
+        <!-- Кнопка действия: меняется иконка (Send / Stop) -->
+        <button id="action-btn" class="absolute right-1.5 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-full shadow-md transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" aria-label="action">
+           <svg id="icon-send" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Подключаем компонент модального окна -->
+{% include "components/delete_modal.html" %}
+
+<!-- Подключаем основную логику чата -->
+<script src="/static/js/chat.js"></script>
+
+{% endblock %}
