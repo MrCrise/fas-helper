@@ -1,10 +1,11 @@
+import os
 import time
 from typing import AsyncGenerator
 from qdrant_client import AsyncQdrantClient
 from database import load_database_url
 from document_fetcher import AsyncDocumentFetcher
 from FlagEmbedding import BGEM3FlagModel
-from constants import EMBEDDING_MODEL, OLLAMA_HOST
+from constants import EMBEDDING_MODEL
 from llm_service import AsyncLLMService
 from retriever import AsyncRetriever
 from schemas import DocumentMetadata, ErrorEvent, SourcesEvent, SourcesEventData, TokenEvent
@@ -35,15 +36,19 @@ class AsyncRAG:
         print("OK")
 
         print(" [3/4] Connecting to Qdrant", end=" ", flush=True)
+        qdrant_host = os.getenv("QDRANT_HOST")
+        qdrant_port = int(os.getenv("QDRANT_PORT"))
         self.client = AsyncQdrantClient(
-            host="localhost", port=6334, prefer_grpc=True)
+            host=qdrant_host, port=qdrant_port, prefer_grpc=True)
         self.retriever = AsyncRetriever(
             self.client, self.model, self.doc_fetcher)
         print("OK")
 
         print(" [4/4] Initializing Ollama", end=" ", flush=True)
+        ollama_host = os.getenv("OLLAMA_HOST")
+        ollama_port = os.getenv("OLLAMA_PORT")
         self.llm = AsyncLLMService(
-            llm_host=OLLAMA_HOST,
+            llm_host=f"{ollama_host}:{ollama_port}",
             model_name="qwen3:8b",
             context_window_size=20000
         )

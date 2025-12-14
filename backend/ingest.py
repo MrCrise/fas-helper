@@ -1,3 +1,4 @@
+import os
 from transformers import AutoTokenizer
 from chunkers.sentence_chunker import SentenceChunker
 from constants import TOKENIZER_NAME
@@ -16,10 +17,13 @@ if __name__ == '__main__':
 
         tokenizer = AutoTokenizer.from_pretrained(
             TOKENIZER_NAME, trust_remote_code=True)
+        
 
+        qdrant_host = os.getenv("QDRANT_HOST")
+        qdrant_port = int(os.getenv("QDRANT_PORT"))
         client = QdrantClient(
-            host="localhost",
-            port=6334,
+            host=qdrant_host,
+            port=qdrant_port,
             prefer_grpc=True,
             timeout=100
         )
@@ -37,7 +41,7 @@ if __name__ == '__main__':
         metadata = create_metadata(engine)
 
         # clear_all_tables(engine, metadata)
-        parse_data(driver, chunker, embedder, engine, metadata, start_page=5, last_page=1)
+        parse_data(driver, chunker, embedder, engine, metadata, start_page=50, last_page=1)
 
         print('-' * 50)
         print(f'Number of cases in the db: {count_cases(engine=engine, metadata=metadata)}')
