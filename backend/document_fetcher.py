@@ -49,6 +49,26 @@ class AsyncDocumentFetcher:
 
             return {row.doc_id: row.full_text for row in rows if row.full_text}
 
+    async def get_texts_and_urls_by_ids(self, doc_ids: List[str]) -> Dict[str, Dict[str, str]]:
+        """
+        Получает полные текста документов и URL по их ID одним запросом.
+        """
+
+        if not doc_ids:
+            return {}
+
+        table = await self._get_table()
+
+        async with self.async_session() as session:
+            statement = select(table.c.doc_id, table.c.full_text, table.c.url).where(
+                table.c.doc_id.in_(doc_ids))
+
+            result = await session.execute(statement)
+            rows = result.fetchall()
+
+            return {row.doc_id: {"full_text": row.full_text,
+                                 "url": row.url} for row in rows if row.full_text}
+
     async def close(self) -> None:
         """
         Закрывает соединение с БД.

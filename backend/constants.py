@@ -5,4 +5,4 @@ EMBEDDER_VER = "1.0"
 
 QDRANT_COLLECTION_NAME = "legal_rag"
 
-OLLAMA_HOST = "http://localhost:11434"
+LLM_NAME = "qwen3:8b"

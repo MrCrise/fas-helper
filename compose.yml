@@ -1,0 +1,94 @@
+name: fas-helper
+version: "3.8"
+services:
+  db:
+    image: postgres:18.0
+    container_name: pg-18
+    environment:
+      POSTGRES_USER: raw_storage_admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: raw_storage
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+      
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: always
+    container_name: qdrant
+    environment:
+      - QDRANT__STORAGE__OPTIMIZERS__FLUSH_INTERVAL_SEC=2
+    ports:
+      - 6333:6333
+      - 6334:6334
+    expose:
+      - 6333
+      - 6334
+      - 6335
+    configs:
+      - source: qdrant_config
+        target: /qdrant/config/production.yaml
+    volumes:
+      - qdrant_data:/qdrant/storage
+      
+  frontend:
+    build: ./frontend
+    container_name: fas_frontend
+    ports:
+      - "5000:5000"
+
+  backend:
+    build: ./backend
+    container_name: fas_backend
+    ports:
+      - "8000:8000"
+    
+    volumes:
+      - ./backend:/app
+      - hf_cache:/app/data/hf_cache
+      
+    environment:
+      - HF_HOME=/app/data/hf_cache
+      - DATABASE_URL=postgresql://raw_storage_admin:1234@db:5432/raw_storage
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6334
+      - OLLAMA_HOST=ollama
+      - OLLAMA_PORT=11434
+    command: python api.py
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: fas_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  chrome:
+    image: selenium/standalone-chrome:latest
+    container_name: fas_chrome
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+    shm_size: "2gb"
+    restart: always
+
+configs:
+  qdrant_config:
+    content: |
+      log_level: INFO
+
+volumes:
+  pgdata:
+  qdrant_data:
+  ollama_models:
+  hf_cache:

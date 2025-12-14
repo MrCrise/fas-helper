@@ -1,0 +1,148 @@
+import os
+import time
+from typing import AsyncGenerator
+from qdrant_client import AsyncQdrantClient
+from database import load_database_url
+from document_fetcher import AsyncDocumentFetcher
+from FlagEmbedding import BGEM3FlagModel
+from constants import EMBEDDING_MODEL
+from llm_service import AsyncLLMService
+from retriever import AsyncRetriever
+from schemas import DocumentMetadata, ErrorEvent, SourcesEvent, SourcesEventData, TokenEvent
+
+
+class AsyncRAG:
+    def __init__(self):
+        self.db_url = load_database_url()
+        self.doc_fetcher = None
+        self.client = None
+        self.model = None
+        self.retriever = None
+        self.llm = None
+
+    async def initialize(self):
+        """
+        Инициализирует все подключения и модели.
+        """
+
+        print(" [1/4] Connecting to PostgreSQL", end=" ", flush=True)
+        self.doc_fetcher = AsyncDocumentFetcher(self.db_url)
+        await self.doc_fetcher._get_table()
+        print("OK")
+
+        print(" [2/4] Loading embedding model", end=" ", flush=True)
+        self.model = BGEM3FlagModel(
+            EMBEDDING_MODEL, use_fp16=True, device='cuda')
+        print("OK")
+
+        print(" [3/4] Connecting to Qdrant", end=" ", flush=True)
+        qdrant_host = os.getenv("QDRANT_HOST")
+        qdrant_port = int(os.getenv("QDRANT_PORT"))
+        self.client = AsyncQdrantClient(
+            host=qdrant_host, port=qdrant_port, prefer_grpc=True)
+        self.retriever = AsyncRetriever(
+            self.client, self.model, self.doc_fetcher)
+        print("OK")
+
+        print(" [4/4] Initializing Ollama", end=" ", flush=True)
+        ollama_host = os.getenv("OLLAMA_HOST")
+        ollama_port = os.getenv("OLLAMA_PORT")
+        self.llm = AsyncLLMService(
+            llm_host=f"{ollama_host}:{ollama_port}",
+            model_name="qwen3:8b",
+            context_window_size=20000
+        )
+        print("OK")
+        print("-" * 50)
+
+    async def terminal_stream(self, query: str) -> None:
+        """
+        Обрабатывает один запрос через терминал.
+        """
+
+        start_time = time.time()
+        print(f"Searching for: {query}")
+
+        try:
+            search_results = await self.retriever.search(query=query)
+        except Exception as e:
+            print(f"Searching error: {e}")
+            return
+
+        search_time = time.time() - start_time
+
+        if not search_results:
+            print("Docs not found")
+
+        print(f"Found {len(search_results)} docs in {search_time} secs")
+        # for res in search_results:
+        #     print(
+        #         f"\n--- Doc: {res['doc_id']} (Score: {res['score']:.3f}) ---")
+        #     print(f"Chunk: {res['best_chunk']}...")
+        #     if res['full_text']:
+        #         print(f"Full Text preview: {res['full_text'][:100]}...")
+        #     else:
+        #         print("Full text not found")
+
+        print("LLM generation started")
+        print("-" * 50)
+
+        full_response = ""
+        try:
+            async for chunk in self.llm.generate_stream(query=query, documents=search_results):
+                print(chunk, end="", flush=True)
+                full_response += chunk
+        except Exception as e:
+            print(f"LLM generation error: {e}")
+
+        print("\n" + "-" * 60)
+        total_time = time.time() - start_time
+        print(f"Total time elapsed: {total_time}")
+
+    async def chat_stream(self, query: str) -> AsyncGenerator[str, None]:
+        """
+        Обрабатывает запрос для API.
+        Сначала возвращает источники, потом стрим токенов от LLM.
+        """
+
+        try:
+            search_results = await self.retriever.search(query=query)
+
+            sources_schemas = []
+            for doc in search_results:
+                sources_schemas.append(
+                    DocumentMetadata(
+                        doc_id=doc.get("doc_id"),
+                        url=doc.get("url"),
+                        best_chunk=doc.get("best_chunk", ""),
+                        score=doc.get("score")
+                    )
+                )
+
+            event = SourcesEvent(data=SourcesEventData(items=sources_schemas))
+            yield event.model_dump_json(ensure_ascii=False) + "\n"
+
+            if not search_results:
+                no_docs_event = TokenEvent(
+                    data="К сожалению, релевантные документы не найдены.")
+                yield no_docs_event.model_dump_json(ensure_ascii=False) + "\n"
+
+            async for chunk in self.llm.generate_stream(query=query, documents=search_results):
+                token_event = TokenEvent(data=chunk)
+                yield token_event.model_dump_json(ensure_ascii=False) + "\n"
+
+        except Exception as e:
+            error_event = ErrorEvent(data=str(e))
+            print(f"Error in chat stream: {e}")
+            yield error_event.model_dump_json(ensure_ascii=False) + "\n"
+
+    async def close(self) -> None:
+        """
+        Закрывает все подключения.
+        """
+
+        if self.client:
+            await self.client.close()
+        if self.doc_fetcher:
+            await self.doc_fetcher.close()
+        print("All connections closed")
