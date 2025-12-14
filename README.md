@@ -1,5 +1,5 @@
-# Ingester
-Repo that provides text chunkers, embedders and vector storage data saving.
+# FAS helper
+A RAG system that helps to find legal information using Federal Antimonopoly Service database.
 
 # TODO:
 1. Move LLM prompts to a separate file.
