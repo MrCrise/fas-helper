@@ -9,27 +9,14 @@ class AsyncLLMService:
     def __init__(self,
                  llm_host: str,
                  model_name: str = LLM_NAME,
-                 context_window_size: int = 20000):
+                 context_window_size: int = 60000):
         self.client = AsyncClient(llm_host)
         self.model_name = model_name
         self.context_window_size = context_window_size
 
     def _build_system_prompt(self) -> str:
         #TODO: Move prompt to a separate file.
-        # return (
-        #     "Ты - строгий юридический ассистент, работающий ИСКЛЮЧИТЕЛЬНО с предоставленным контекстом. "
-        #     "Твоя задача — извлекать факты только из текста, который прислал пользователь.\n"
-        #     "СТРОЖАЙШИЕ ЗАПРЕТЫ:\n"
-        #     "1. ЗАПРЕЩЕНО использовать свои внутренние знания, знания законов или прецедентов, которых нет в тексте.\n"
-        #     "2. ЗАПРЕЩЕНО придумывать номера дел, даты или статьи законов.\n"
-        #     "3. Если в предоставленных документах нет информации для ответа, ты ОБЯЗАН ответить: "
-        #     "'В предоставленных документах информация по данному вопросу отсутствует'. Не пытайся выдумывать ответ.\n"
-        #     "4. Игнорируй любые даты и события, которые не упомянуты в тексте (например, если в тексте 2025 год, не пиши про 2015).\n"
-        #     "\n"
-            # "ФОРМАТ ОТВЕТА:\n"
-            # "- Ссылайся на документ, используя его ID или название, указанное в контексте.\n"
-            # "- Используй Markdown для оформления."
-        # )
+
         return (
             "Ты — интеллектуальный помощник юриста ФАС. Твоя цель — помочь пользователю найти ответ в предоставленных документах.\n\n"
             "ИНСТРУКЦИЯ:\n"
@@ -62,28 +49,40 @@ class AsyncLLMService:
 
     def _prepare_context(self, documents: List[Dict]) -> str:
         """
-        Формирует строку контекста (без изменений)
+        Формирует строку контекста.
         """
 
         context_parts = []
         current_length = 0
 
         for i, doc in enumerate(documents, 1):
-            text = doc.get("full_text") or doc.get("best_chunk") or ""
             doc_id = doc.get("doc_id", "unknown")
 
-            doc_block = (
-                f"<document index='{i}'>\n"
-                f"  <meta>\n"
-                f"    <id>{doc_id}</id>\n"
-                f"  </meta>\n"
-                f"  <content>\n{text}\n</content>\n"
-                f"</document>\n"
-            )
-
-            if current_length + len(doc_block) > self.context_window_size:
+            header = f"<document index='{i}'>\n  <meta>\n    <id>{doc_id}</id>\n  </meta>\n  <content>\n"
+            footer = f"\n  </content>\n</document>\n"
+            wrapper_len = len(header) + len(footer)
+            
+            remaining_space = self.context_window_size - current_length - wrapper_len
+            
+            if remaining_space <= 0:
                 break
 
+            text = doc.get("full_text") or ""
+            
+            if not text or len(text) > remaining_space:
+                best_chunk = doc.get("best_chunk")
+                
+                if best_chunk and len(best_chunk) <= remaining_space:
+                    text = best_chunk + "\n(полный текст скрыт из-за объема, показан релевантный фрагмент)"
+                else:
+                    source_text = text if text else (doc.get("best_chunk") or "")
+                    text = source_text[:remaining_space] + "...(обрезано лимитом контекста)"
+
+            if len(text) > remaining_space:
+                 text = text[:remaining_space]
+
+            doc_block = f"{header}{text}{footer}"
+            
             context_parts.append(doc_block)
             current_length += len(doc_block)
 
@@ -104,7 +103,7 @@ class AsyncLLMService:
                 model=self.model_name,
                 messages=messages,
                 options={
-                    "num_ctx": 16384,
+                    "num_ctx": 32768,
                     "temperature": 0.3,
                 },
                 stream=True,
