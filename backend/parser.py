@@ -1,4 +1,5 @@
 import re
+import os
 import json
 import math
 
@@ -26,7 +27,22 @@ def create_chrome_driver():
     options.add_argument(
         '--host-resolver-rules=MAP stat.sputnik.ru 127.0.0.1, MAP www.google-analytics.com 127.0.0.1, MAP mc.yandex.ru 127.0.0.1')
 
-    driver = webdriver.Chrome(options=options)
+    selenium_url = os.environ.get("SELENIUM_URL")
+
+    if selenium_url:
+        print(f"Connecting to Remote Selenium at: {selenium_url}")
+        try:
+            driver = webdriver.Remote(
+                command_executor=selenium_url,
+                options=options
+            )
+            return driver
+        except Exception as e:
+            print(f"Failed to connect to Selenium: {e}")
+            raise e
+    else:
+        print("Starting local Chrome driver...")
+        return webdriver.Chrome(options=options)
 
     return driver
 

@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import create_engine, delete, select, func, MetaData
+from models import Base, Case, Participant, CaseParticipant, Document
 from sqlalchemy.exc import DataError
 from dotenv import load_dotenv
 
@@ -30,6 +32,23 @@ def convert_to_date(date_str):
         return datetime.strptime(date_str, '%Y-%m-%d').date()
     except (ValueError, TypeError):
         return None
+
+
+async def init_db():
+    """
+    Создает таблицы, если они не существуют.
+    Использует модели SQLAlchemy ORM.
+    """
+
+    database_url = load_database_url()
+
+    engine = create_async_engine(database_url, echo=True)
+    
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    await engine.dispose()
+    print("Database tables checked/created.")
 
 
 def save_to_db(case: dict, linked_documents: list, engine, metadata):
