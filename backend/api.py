@@ -5,6 +5,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from rag_service import AsyncRAG
+from database import init_db
 from schemas import ChatRequest
 
 
@@ -20,6 +21,11 @@ async def lifespan(app: FastAPI):
 
     global rag_service
     print("Starting API...")
+
+    try:
+        await init_db()
+    except Exception as e:
+        print(f"Error creating database tables: {e}")
 
     rag_service = AsyncRAG()
     await rag_service.initialize()

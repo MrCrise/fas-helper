@@ -50,11 +50,17 @@ services:
       
     environment:
       - HF_HOME=/app/data/hf_cache
-      - DATABASE_URL=postgresql://raw_storage_admin:1234@db:5432/raw_storage
+      - DATABASE_URL=postgresql+asyncpg://raw_storage_admin:1234@db:5432/raw_storage
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6334
       - OLLAMA_HOST=ollama
       - OLLAMA_PORT=11434
+      - SELENIUM_URL=http://fas_chrome:4444/wd/hub
+  
+    depends_on:
+      - db
+      - qdrant
+
     command: python api.py
 
   ollama:
