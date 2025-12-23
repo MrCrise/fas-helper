@@ -10,12 +10,15 @@ from dotenv import load_dotenv
 def load_database_url():
     load_dotenv()
     # .env файл в формате postgresql://user:pass@localhost/mydb
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-    return DATABASE_URL
+    url = os.environ.get('DATABASE_URL')
+    if url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+asyncpg://")
+    return url
 
 
 def create_db_engine(database_url, logging):
-    engine = create_engine(database_url, echo=logging)
+    sync_url = database_url.replace("+asyncpg", "+psycopg2")
+    engine = create_engine(sync_url, echo=logging)
     return engine
 
 
