@@ -66,7 +66,7 @@ def save_to_db(case: dict, linked_documents: list, engine, metadata):
 
     with engine.begin() as conn:
         existing_case = conn.execute(
-            cases.select().where(cases.c.case_id == case['case_id'])
+            cases.select().where(cases.c.text_id == case['case_id'])
         ).first()
 
         if existing_case:
