@@ -3,7 +3,7 @@ import os
 import json
 import math
 
-from database import save_to_db, update_document_qdrant_status
+from database import save_to_db, check_existing_documents, update_document_qdrant_status
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -43,8 +43,6 @@ def create_chrome_driver():
     else:
         print("Starting local Chrome driver...")
         return webdriver.Chrome(options=options)
-
-    return driver
 
 
 def create_firefox_driver():
@@ -240,6 +238,16 @@ def normalize_id(raw_id):
     return normalized
 
 
+def extract_case_id(case_name):
+    """Извлекает ID дела разными способами"""
+    match = re.search(r'№\s*([^ ]+)', case_name)
+    if match:
+        return 'fas_' + normalize_id(match.group(1))
+    
+    words = case_name.split()[:3]
+    return 'fas_' + normalize_id('_'.join(words))
+
+
 def parse_data(driver, chunker, embedder, engine, metadata, start_page=2, last_page=1, step=-1):
     """Функция парсит данные из базы ФАС"""
 
@@ -254,8 +262,13 @@ def parse_data(driver, chunker, embedder, engine, metadata, start_page=2, last_p
 
         for case_url in cases_urls:
             case, linked_documents = parse_one_case(driver, case_url)
-            save_to_db(case, linked_documents, engine, metadata)
-            for doc in linked_documents:
+            existing_ids = check_existing_documents(linked_documents, engine, metadata)
+            new_documents = [
+                doc for doc in linked_documents 
+                if doc['raw_doc_id'] not in existing_ids
+            ]
+            save_to_db(case, new_documents, engine, metadata)
+            for doc in new_documents:
                 try:
                     text = doc['document_text']
                     chunks = chunker.chunk(text, doc_id=doc['document_id'])
@@ -294,7 +307,7 @@ def parse_one_case(driver, case_url):
     case_id_match = re.search(r'№([^ ]+)', case_name)
     raw_case_id = case_id_match.group(
         1) if case_id_match else f"case_{hash(case_name)}"
-    case_id = 'fas_' + normalize_id(raw_case_id)
+    case_id = extract_case_id(case_name)
 
     date_match = re.search(r'от (\d{1,2} \w+ \d{4}) г\.', case_name)
     raw_date = date_match.group(1) if date_match else ""
@@ -469,21 +482,9 @@ def parse_one_case(driver, case_url):
             else:
                 print(f"Empty document: {doc_url}")
 
-        # except NoSuchElementException as e:
-        #     documents.append({
-        #         'case_id': case_id,
-        #         'document_id': f"unavailable_{doc_idx}",
-        #         'raw_doc_id': f"unavailable_{doc_idx}",
-        #         'title': f"Недоступный документ {doc_idx}",
-        #         'document_date': "",
-        #         'url': doc_url,
-        #         'document_text': "Документ недоступен",
-        #         'text_length': 0,
-        #         'document_type': "Недоступен"
-        #     })
         except Exception as e:
             continue
-
+    
     return case_record, documents
 
 

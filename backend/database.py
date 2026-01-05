@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import create_engine, delete, select, func, MetaData
 from models import Base, Case, Participant, CaseParticipant, Document
-from sqlalchemy.exc import DataError
+from sqlalchemy.exc import DataError, IntegrityError
 from dotenv import load_dotenv
 
 
@@ -66,7 +66,7 @@ def save_to_db(case: dict, linked_documents: list, engine, metadata):
 
     with engine.begin() as conn:
         existing_case = conn.execute(
-            cases.select().where(cases.c.raw_id == case['raw_id'])
+            cases.select().where(cases.c.text_id == case['case_id'])
         ).first()
 
         if existing_case:
@@ -136,37 +136,55 @@ def save_to_db(case: dict, linked_documents: list, engine, metadata):
                 ))
 
         for doc in linked_documents:
-            existing_document = conn.execute(
-                documents.select().where(
-                    documents.c.raw_doc_id == doc['raw_doc_id'])
-            ).first()
-
-            if existing_document:
-                print(f"Document {doc['document_id']} already exists")
-                try:
-                    linked_documents.remove(doc)
-                except ValueError as e:
-                    print(
-                        f"Error while removing existing document {doc['document_id']} from saving list: {e}")
-            else:
-                try:
-                    conn.execute(
-                        documents.insert().values(
-                            case_id=case_id,
-                            doc_id=doc['document_id'],
-                            raw_doc_id=doc['raw_doc_id'],
-                            title=doc['title'],
-                            publish_date=convert_to_date(doc['document_date']),
-                            url=doc['url'],
-                            full_text=doc['document_text'],
-                            text_length=doc['text_length'],
-                            doc_type=doc['document_type'],
-                            added_to_qdrant=doc.get('added_to_qdrant', False),
-                            embedder_version=doc.get('embedder_version')
-                        )
+            try:
+                conn.execute(
+                    documents.insert().values(
+                        case_id=case_id,
+                        doc_id=doc['document_id'],
+                        raw_doc_id=doc['raw_doc_id'],
+                        title=doc['title'],
+                        publish_date=convert_to_date(doc['document_date']),
+                        url=doc['url'],
+                        full_text=doc['document_text'],
+                        text_length=doc['text_length'],
+                        doc_type=doc['document_type'],
+                        added_to_qdrant=doc.get('added_to_qdrant', False),
+                        embedder_version=doc.get('embedder_version')
                     )
-                except Exception as e:
-                    print(f"Document saving error {doc['document_id']}: {e}")
+                )
+            except IntegrityError:
+                print(f"Document {doc['document_id']} already exists")
+                continue
+            except Exception as e:
+                print(f"Document saving error {doc['document_id']}: {e}")
+        
+        
+def check_existing_documents(linked_documents: list, engine, metadata):
+    """Проверяет, какие документы уже существуют в БД"""
+    documents = metadata.tables['documents']
+    existing_docs = set()
+    
+    with engine.connect() as conn:
+        for doc in linked_documents:
+            existing_by_url = conn.execute(
+                documents.select().where(documents.c.url == doc['url'])
+            ).first()
+            
+            if existing_by_url:
+                existing_docs.add(doc['raw_doc_id'])
+                print(f"Document found by URL: {doc['document_id']}")
+                continue
+            
+            existing_by_id = conn.execute(
+                documents.select().where(
+                    documents.c.raw_doc_id == doc['raw_doc_id']
+                )
+            ).first()
+            
+            if existing_by_id:
+                existing_docs.add(doc['raw_doc_id'])
+    
+    return existing_docs
 
 
 def update_document_qdrant_status(doc_id: str, success: bool, version: str, engine, metadata):
