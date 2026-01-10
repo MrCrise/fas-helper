@@ -340,7 +340,7 @@ function updateUIState(loading) {
 }
 
 /**
- * Создает пустой пузырь сообщения бота с индикатором печати.
+ * Создает пустой пузырь сообщения бота с индикатором печати и таймером.
  * Возвращает объект с ссылками на DOM элементы для последующего обновления.
  */
 function createBotMessage() {
@@ -352,11 +352,29 @@ function createBotMessage() {
   
   const answerText = document.createElement('div'); answerText.className = 'answer-markdown';
   
-  const typing = document.createElement('div'); typing.className = 'typing-indicator';
+  // Контейнер для загрузки (Таймер + Точки)
+  const loadingContainer = document.createElement('div');
+  loadingContainer.className = 'loading-container';
+
+  // Элемент таймера
+  const timerSpan = document.createElement('span');
+  timerSpan.className = 'gen-timer';
+  timerSpan.textContent = '0.0s';
+
+  // Индикатор печати (точки)
+  const typing = document.createElement('div'); 
+  typing.className = 'typing-indicator';
   typing.innerHTML = `<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>`;
 
-  bubble.appendChild(docsBlock); bubble.appendChild(answerText); bubble.appendChild(typing);
-  row.appendChild(bubble); chatContainer.appendChild(row);
+  loadingContainer.appendChild(timerSpan);
+  loadingContainer.appendChild(typing);
+
+  bubble.appendChild(docsBlock); 
+  bubble.appendChild(answerText); 
+  bubble.appendChild(loadingContainer); 
+  
+  row.appendChild(bubble); 
+  chatContainer.appendChild(row);
   setTimeout(() => scrollToBottom(true), 10);
   
   return { 
@@ -365,13 +383,13 @@ function createBotMessage() {
       docsBlock, 
       docsGrid: docsBlock.querySelector('.docs-grid'), 
       answerText, 
-      typing, 
+      loadingContainer, // Ссылка на весь блок загрузки для его удаления
+      timerSpan,        // Ссылка на текст таймера для обновления цифр
       rawText: '', 
       typingRemoved: false, 
       sources: [] 
   };
 }
-
 /**
  * Обновляет список документов в пузыре бота.
  * Вызывается при получении события типа 'sources' от сервера.
@@ -417,11 +435,17 @@ function scheduleMarkdownRender(botMsg) {
  * Args:
  *   query (string): Текст запроса пользователя
  */
+/**
+ * Основная функция отправки запроса.
+ * Реализует паттерн Streaming Response с добавлением отсчета времени.
+ * 
+ * Args:
+ *   query (string): Текст запроса пользователя
+ */
 async function sendQuery(query) { 
   if (!query) return;
   abortController = new AbortController();
   
-  // Если это первое сообщение — инициализируем сессию
   if (!currentSessionId) {
       currentSessionId = Date.now().toString();
       chatHistory = [];
@@ -435,8 +459,14 @@ async function sendQuery(query) {
 
   const botMsg = createBotMessage();
 
+  // === Запуск таймера ===
+  let startTime = Date.now();
+  let timerInterval = setInterval(() => {
+    const elapsed = (Date.now() - startTime) / 1000;
+    botMsg.timerSpan.textContent = elapsed.toFixed(1) + 's';
+  }, 100);
+
   try {
-    // Подготовка истории (очистка от лишних полей)
     const cleanHistory = chatHistory.map(msg => ({ role: msg.role, content: msg.content }));
 
     const response = await fetch(API_URL, {
@@ -448,7 +478,6 @@ async function sendQuery(query) {
 
     if (!response.ok) throw new Error(`Server Error: ${response.status} ${response.statusText}`);
 
-    // Чтение потока (Stream Reader)
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let buffer = '';
@@ -457,9 +486,8 @@ async function sendQuery(query) {
       const { value, done } = await reader.read(); 
       if (done) break; 
       buffer += decoder.decode(value, { stream: true });
-      buffer = buffer.replace(/\r/g, ''); // Фикс для Windows
+      buffer = buffer.replace(/\r/g, ''); 
       
-      // Парсинг JSON-строк (Server-Sent Events стиль)
       let boundary = buffer.indexOf('\n');
       while (boundary !== -1) {
           const part = buffer.slice(0, boundary).trim();
@@ -468,12 +496,11 @@ async function sendQuery(query) {
               try { 
                 const data = JSON.parse(part); 
                 
-                // Обработка разных типов событий
                 if (data.type === 'sources') updateDocs(botMsg, data.data?.items);
                 else if (data.type === 'token') {
-                   // Убираем индикатор при первом токене
                    if (data.data && !botMsg.typingRemoved) { 
-                       botMsg.typing.remove(); 
+                       clearInterval(timerInterval); // Остановить отсчет
+                       botMsg.loadingContainer.remove(); // Удалить таймер и точки из DOM
                        botMsg.typingRemoved = true; 
                    }
                    botMsg.rawText += data.data || '';
@@ -489,33 +516,36 @@ async function sendQuery(query) {
       }
     }
 
-    // Завершение ответа
-    if (botMsg.typing && !botMsg.typingRemoved) botMsg.typing.remove();
-    botMsg.answerText.innerHTML = DOMPurify.sanitize(marked.parse(botMsg.rawText));
+    if (!botMsg.typingRemoved) {
+        clearInterval(timerInterval);
+        botMsg.loadingContainer.remove();
+    }
     
-    // Сохранение ответа в историю
+    botMsg.answerText.innerHTML = DOMPurify.sanitize(marked.parse(botMsg.rawText));
     chatHistory.push({ role: "assistant", content: botMsg.rawText, sources: botMsg.sources });
     saveSession(savedSessions[currentSessionId].title);
 
   } catch (err) { 
+    clearInterval(timerInterval); // Страховка остановки таймера
     if (err.name === 'AbortError') {
-       // Обработка ручной остановки
-       if (botMsg.typing && !botMsg.typingRemoved) botMsg.typing.remove();
+       if (!botMsg.typingRemoved) botMsg.loadingContainer.remove();
        botMsg.answerText.innerHTML += `<div style="opacity:0.6; margin-top:10px; font-size:0.85rem; border-top:1px solid var(--card-border); padding-top:6px;">⏹ Остановлено</div>`;
        chatHistory.push({ role: "assistant", content: botMsg.rawText, sources: botMsg.sources });
        saveSession(savedSessions[currentSessionId].title);
     } else {
        console.error(err);
-       if (botMsg.typing && !botMsg.typingRemoved) botMsg.typing.remove();
+       if (!botMsg.typingRemoved) botMsg.loadingContainer.remove();
        botMsg.answerText.innerHTML += `<div style="color: #ef4444; margin-top: 10px;">Ошибка: ${err.message}</div>`;
-       chatHistory.pop(); // Откат истории при ошибке
+       chatHistory.pop(); 
     }
   } finally { 
+    clearInterval(timerInterval);
     updateUIState(false); 
     scrollToBottom(true);
   }
 }
 
+  
 // --- Bind Events (Привязка событий) ---
 
 // Делегирование событий для кнопки "Новый чат"
